@@ -1,6 +1,7 @@
 const db = require("../models");
 let user = require('../user.json');
 const bcrypt = require('bcrypt');
+const utils = require('../utils');
 
 exports.updateUserProfile = async (req, res, next) => {
   const response = await db.userprofile.findOneAndReplace(
@@ -13,7 +14,10 @@ exports.updateUserProfile = async (req, res, next) => {
 
 exports.getUser = async (req,res,next) => {
     const query = { email: req.params.email };
-    const response = await db.userprofile.find(query);
+    let response = await db.userprofile.find(query);
+    response = JSON.stringify(response);
+    response = JSON.parse(response);
+    console.log(response);
     const sharedDashboardsTo = await db.userprofile.find(
         {
             'sharedByUser.to': req.params.email,
@@ -33,6 +37,7 @@ exports.getUser = async (req,res,next) => {
     reply.push(sharedDashboardsTo);
 
     if (response.length > 0) {
+        console.log(reply)
         res.json(reply);
     } else res.json({ answer: 'nothing found' });
 }
