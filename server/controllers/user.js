@@ -33,7 +33,7 @@ exports.getUser = async (req,res,next) => {
     );
     
     let reply = [];
-    reply.push(response);
+    reply.push(utils.removePassword(response));
     reply.push(sharedDashboardsTo);
 
     if (response.length > 0) {
