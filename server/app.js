@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 // import { v4 as uuidv4 } from 'uuid';
+const userController = require('../server/controllers/user');
 let db = require('./models');
 let user = require('./user.json');
 let usersSockets = new Map();
@@ -62,37 +63,7 @@ app.post('/api/insertShared', async (req, res) => {
     // console.log(result);
     res.json(result);
 });
-app.get('/api/getUser/:email', async (req, res) => {
-    // console.log('getUser called for email:', req.params);
-    const query = { email: req.params.email };
-    const response = await db.userprofile.find(query);
-    const sharedDashboardsTo = await db.userprofile.find(
-        {
-            'sharedByUser.to': req.params.email,
-        },
-        {
-            _id: 0,
-            email: 1,
-            'sharedByUser.$': 1,
-            dashboards: 1,
-            firstname: 1,
-            lastname: 1,
-        }
-    );
-    // const sharedDashboardsFrom = await db.shared.find({
-    //     sharedFrom: req.params.email,
-    // });
-    let reply = [];
-    reply.push(response);
-    reply.push(sharedDashboardsTo);
-    // reply.push(sharedDashboardsFrom);
-    // console.log(reply);
-
-    if (response.length > 0) {
-        res.json(reply);
-    } else res.json({ answer: 'nothing found' });
-    // res.end('ok');
-});
+app.get('/api/getUser/:email', userController.getUser);
 
 app.get('/api/getUserName/:email', async (req, res) => {
     const query = { email: req.params.email };
@@ -151,51 +122,7 @@ app.post('/api/addUser', async (req, res) => {
     }
 });
 
-app.post('/api/login', async (req, res) => {
-    console.log(req.body);
-    user = { ...user, ...req.body };
-    const query = { email: req.body.email };
-    //const userProfile = await db.userprofile.findOne(query);
-    let userProfile = await db.userprofile.find(query, {
-        _id: 0,
-        email: 1,
-        password: 1,
-    });
-    // userProfile = JSON.stringify(userProfile);
-    // userProfile = JSON.parse(userProfile);
-    // console.log(b[0].password);
-
-    // let userProfile = JSON.stringify(userProfile1);
-    // userProfile = JSON.parse(userProfile);
-    console.log(typeof userProfile);
-    let response;
-    if (userProfile) {
-        userProfile = JSON.stringify(userProfile);
-        userProfile = JSON.parse(userProfile);
-        console.log(typeof userProfile);
-        console.log(req.body.password);
-        if (userProfile[0]) {
-            console.log(userProfile[0].password);
-            const isValidPassword = await bcrypt.compare(
-                req.body.password,
-                userProfile[0].password
-            );
-            if (isValidPassword) {
-                response = {
-                    message: 'OK',
-                    email: userProfile[0].email,
-                };
-            } else {
-                response = { message: 'Invalid username/password' };
-            }
-        } else {
-            response = { message: 'Invalid username/password' };
-        }
-    } else {
-        response = { message: 'Database error' };
-    }
-    res.json(response);
-});
+app.post('/api/login', userController.login);
 
 app.post('/api/notify', async (req, res) => {
     console.log(req.body);
@@ -218,15 +145,17 @@ app.post('/api/notify', async (req, res) => {
     // console.log(response);
 
 })
-app.post('/api/updateUserProfile', async (req, res) => {
-    // console.log(req.body);
-    // user = { ...user, ...req.body };
-    const response = await db.userprofile.findOneAndReplace(
-        { email: req.body.email },
-        req.body
-    );
-    res.json(response);
-});
+// app.post('/api/updateUserProfile', async (req, res) => {
+//     // console.log(req.body);
+//     // user = { ...user, ...req.body };
+//     const response = await db.userprofile.findOneAndReplace(
+//         { email: req.body.email },
+//         req.body
+//     );
+//     res.json(response);
+// });
+
+app.post('/api/updateUserProfile',userController.updateUserProfile);
 app.get('/login', (req, res) => {
     const options = {
         root: path.join(__dirname, 'public'),
