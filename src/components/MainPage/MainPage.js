@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import * as actionType from "../../store/types";
 import { addColumn as addNewColumn } from "../../utils";
 import * as action from "../../utils/actions";
+import { Button } from '@material-ui/core';
 
 const query = { query: `user=${secureStorage.getItem("email")}` };
 const socket = openSocket("http://localhost:8080", query);
@@ -499,13 +500,9 @@ function MainPage(props) {
                     >
                         Delete
                     </button> */}
-          <button
-            type="button"
-            class="btn btn-sm btn-danger"
-            onClick={modalShow}
-          >
+          <Button color='primary' variant='contained' onClick={modalShow}>
             Delete
-          </button>
+          </Button>
           <Modal show={deleteModal} onHide={modalHide}>
             <Modal.Header closeButton>
               <Modal.Title>
