@@ -46,9 +46,21 @@ export const isLogin = () => {
 
 export const addColumn = () => {
     const newColumn = {
-        name: 'Hello',
+        name: '',
         id: uuidv4(),
         cards: [],
     };
     return newColumn;
+}
+
+export const addCard = () => {
+    const newCard = {
+        title: "",
+        id: uuidv4(),
+        duedate: "",
+        lables: ["Important", "Medium", "Low"],
+        description: "",
+        asignee: [""],
+      };
+    return newCard;
 }
