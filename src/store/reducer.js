@@ -1,4 +1,5 @@
-import * as actionType from "./types"
+import * as actionType from "./types";
+import { addCard as addNewCard } from "../utils";
 
 const initialState = {
   user: {
@@ -32,6 +33,7 @@ const user = (state = initialState, action) => {
 
   const newState = { ...state };
   const currentDashboard = state.currentDashboard;
+  const { payload } = action;
   let dashboard;
 
   switch (action.type) {
@@ -56,7 +58,16 @@ const user = (state = initialState, action) => {
       return newState
 
     case actionType.DELETE_CARD:
-      return state;
+      dashboard = { ...state.user.dashboards[currentDashboard] };
+      dashboard.columns[payload.colIndex].cards.splice(payload.cardIndex,1);
+      newState.user.dashboards[currentDashboard] = dashboard;
+      return newState;
+
+    case actionType.ADD_CARD:
+      dashboard = { ...state.user.dashboards[currentDashboard] };
+      dashboard.columns[payload.colIndex].cards.push(addNewCard());
+      newState.user.dashboards[currentDashboard] = dashboard;
+      return newState;
 
     case actionType.SET_CURR_DASHBOARD:
       newState.currentDashboard = action.payload.dashboard;
@@ -68,7 +79,7 @@ const user = (state = initialState, action) => {
       ].name = action.payload.colTitle;
       return newState;
 
-    case actionType.UPDATE_USER:
+    case actionType.UPDATE_USER_REQUEST:
       return state;
 
     default:
