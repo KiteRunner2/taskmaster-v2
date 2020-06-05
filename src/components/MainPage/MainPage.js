@@ -33,14 +33,7 @@ function MainPage(props) {
     lastname: "",
     dashboards: [{ columns: [], shared: [] }],
   });
-  // const [
-  //     userProfile,
-  //     dispatch,
-  //     currentDash,
-  //     setCurrentDash,
-  // ] = useGlobalUserStore();
-  // console.log('logging userProfile from MainPage component', userProfile);
-  //console.log(props.location.state.email);
+ 
   const [sharedToUser, setSharedToUser] = useState([]);
   // const [sharedFromUser, setSharedFromUser] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
@@ -119,10 +112,7 @@ function MainPage(props) {
       action.addColumn({ column: addNewColumn()})
     );
     dispatch(action.updateUserProfile(userprofile));
-    // user.dashboards[currentDashboard].columns.push(newColumn);
-    // setUser({ ...user });
-    // updateUserProfile(userprofile);
-    // socket.emit('update', 'column added', newColumn.id);
+    // socket.emit('update', 'column added');
   }
 
   function deleteColumnFromDashboard(colIndex) {
