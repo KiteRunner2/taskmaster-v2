@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../components-style.css";
 import Column from "../Column/Column";
-import ColumnTitle from "../ColumTitle/ColumnTitle";
 import InviteCard from "../InviteCard/InviteCard";
 import SharedWith from "../SharedWith/SharedWith";
 import SwitchUser from "../SwitchUser/SwitchUser";
@@ -14,7 +13,7 @@ import Chat from "../Chat/Chat";
 import Modal from "react-bootstrap/Modal";
 import { connect } from "react-redux";
 import * as actionType from "../../store/types";
-import { addColumn as addNewColumn } from "../../utils";
+import { addColumn as addNewColumn, addCard as addNewCard } from "../../utils";
 import * as action from "../../utils/actions";
 import { Button } from '@material-ui/core';
 
@@ -60,16 +59,7 @@ function MainPage(props) {
   const [currentDashboard, setCurrentDashboard] = useState(0);
 //   const shared = user.dashboards[currentDash].shared;
 
-  function addColumnToDashboard() {
-    dispatch(
-      action.addColumn({ column: addNewColumn()})
-    );
-    dispatch(action.updateUserProfile());
-    // user.dashboards[currentDashboard].columns.push(newColumn);
-    // setUser({ ...user });
-    updateUserProfile(userprofile);
-    // socket.emit('update', 'column added', newColumn.id);
-  }
+  
 
   const [deleteModal, setDeleteModal] = useState(false);
   function modalShow() {
@@ -123,27 +113,27 @@ function MainPage(props) {
   }
 
   function updateDashboard(dashboardIndex) {}
+
+  function addColumnToDashboard() {
+    dispatch(
+      action.addColumn({ column: addNewColumn()})
+    );
+    dispatch(action.updateUserProfile(userprofile));
+    // user.dashboards[currentDashboard].columns.push(newColumn);
+    // setUser({ ...user });
+    // updateUserProfile(userprofile);
+    // socket.emit('update', 'column added', newColumn.id);
+  }
+
   function deleteColumnFromDashboard(colIndex) {
     // console.log('function deleteColumn called', colIndex);
     dispatch({type:actionType.DELETE_COLUMN,payload:{colIndex:colIndex}});
     // user.dashboards[currentDashboard].columns.splice(colIndex, 1);
     // setUser({ ...user });
+    dispatch(action.updateUserProfile())
     updateUserProfile(userprofile);
   }
-  function addCard(columnIndex) {
-    const newCard = {
-      title: "",
-      id: uuidv4(),
-      duedate: "",
-      lables: ["Important", "Medium", "Low"],
-      description: "",
-      asignee: [""],
-    };
-    user.dashboards[currentDashboard].columns[columnIndex].cards.push(newCard);
-    setUser({ ...user });
-    updateUserProfile(user);
-  }
-
+ 
   async function switchUser(email) {
     await setCurrentDashboard(0);
     await setCurrentUser(email);
@@ -244,63 +234,9 @@ function MainPage(props) {
     console.log("loggin response from server for /api/insertShared: ", result);
   }
 
-  async function saveCard(cardid, colIndex, cardIndex) {
-    console.log("function saveCard called", cardid, colIndex, cardIndex);
-    let title = document.getElementById("title" + cardid)
-      ? document.getElementById("title" + cardid)
-      : "";
-    console.log("logging card title", title.value);
-    let description = document.getElementById("desc" + cardid)
-      ? document.getElementById("desc" + cardid)
-      : "";
-    console.log("logging card description", description.value);
-    let date = document.getElementById("date" + cardid)
-      ? document.getElementById("date" + cardid)
-      : "";
-    console.log("logging card date", date.value);
-    console.log(title.value, description.value, date.value);
-    const updatedCard = {
-      title: title.value ? title.value : "",
-      id: cardid,
-      duedate: date.value ? date.value : "",
-      lables: ["Important", "Medium", "Low"],
-      description: description.value ? description.value : "",
-      asignee: [""],
-    };
-    user.dashboards[currentDashboard].columns[colIndex].cards[
-      cardIndex
-    ] = updatedCard;
-    await setUser({ ...user });
-    await updateUserProfile(user);
-  }
-
-  function deleteCard(columnIndex, cardIndex) {
-    // console.log('function deleteCard called!', columnIndex, cardIndex);
-    // console.log(
-    //     'displaying user object before deletetion',
-    //     JSON.stringify(
-    //         user.dashboards[currentDashboard].columns[columnIndex].cards
-    //     )
-    // );
-    user.dashboards[currentDashboard].columns[columnIndex].cards.splice(
-      cardIndex,
-      1
-    );
-    // console.log(
-    //     'displaying user object after deletetion',
-    //     JSON.stringify(
-    //         user.dashboards[currentDashboard].columns[columnIndex].cards
-    //     )
-    // );
-    setUser({ ...user });
-    updateUserProfile(userprofile);
-  }
   function updateColumnTitle(index, title) {
-    // console.log('function updateColumnTitle called', index, title);
     dispatch(action.updateColTitle({colIndex:index,colTitle:title}));
-    // userprofile.dashboards[currentDash].columns[index].name = title;
-    // setUser({ ...user });
-    updateUserProfile(userprofile);
+    dispatch(action.updateUserProfile(userprofile));
   }
 
   function assignToCard(cardid, colIndex, cardIndex) {
@@ -350,7 +286,7 @@ function MainPage(props) {
       },
     }).then((response) => response.json());
     // console.log(result);
-    if (user.sharedByUser.length > 0) {
+    if (userprofile.sharedByUser.length > 0) {
       const toEmit = {
         user: user.email,
         shared: user.sharedByUser,
@@ -382,7 +318,7 @@ function MainPage(props) {
     console.log("filtered OTHER dashboards:", filteredDashboardsOther);
   }
 
-  async function getUser(email) {
+  function getUser(email) {
     console.log('running function getUser with email',email)
     // function populateShared() {
     //   // console.log('SHARED To USER LENGTH IS:', sharedTo.length);
@@ -472,9 +408,9 @@ function MainPage(props) {
             />
           </div>
           <div className="addedUsers">
-            <button type="button" className="btn btn-sm btn-secondary user">
+            <Button variant='contained' className="btn btn-sm btn-secondary user">
               {userprofile ? userprofile.dashboards[currentDash].owner:null}
-            </button>
+            </Button>
             {userprofile.dashboards[currentDash].shared.map((element) => {
               return (
                 <button
@@ -510,20 +446,22 @@ function MainPage(props) {
               </Modal.Title>
             </Modal.Header>
             <Modal.Footer>
-              <button
-                type="button"
-                class="btn btn-outline-dark"
+            <Button
+                color='secondary'
+                variant='contained'
+                onClick={handleDelete}
+                style={{marginRight:'1rem'}}
+              >
+                Delete
+              </Button>
+              <Button
+                color='default'
+                variant='contained'
                 onClick={modalHide}
               >
                 Cancel
-              </button>
-              <button
-                type="button"
-                class="btn btn-danger"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
+              </Button>
+              
             </Modal.Footer>
           </Modal>
         </div>
@@ -556,38 +494,29 @@ function MainPage(props) {
         {userprofile.dashboards[currentDash].columns.map((element, index) => {
           return (
             <Column
-              // id={element.id}
               key={uuidv4()}
               cards={element.cards}
               colName={element.name}
               colid={element.id}
-              addCard={addCard}
-              deleteCard={deleteCard}
               colIndex={index}
-              deleteColumn={deleteColumnFromDashboard}
-              saveCard={saveCard}
               assignToCard={assignToCard}
               updateCardsOnDrop={updateCardsOnDrop}
               shared={user.dashboards[currentDashboard].shared}
-              colTitle={
-                <ColumnTitle
-                  title={element.name}
-                  index={index}
-                  updateColumnTitle={updateColumnTitle}
-                />
-              }
+              colTitle={element.name}
+              updateColumnTitle={updateColumnTitle}
+              
             />
           );
         })}
 
         <div style={{ margin: "32px" }}>
-          <button
-            type="button"
-            className="btn-lg btn-dark"
+          <Button
+            variant="contained"
+            color='default'
             onClick={() => addColumnToDashboard()}
           >
             Add column
-          </button>
+          </Button>
         </div>
       </div>
       {/* <div>
@@ -595,7 +524,6 @@ function MainPage(props) {
                     <SharedDashboardInfoPanel sharedDashboards={sharedToUser} />
                 ) : null}
             </div> */}
-      {userprofile.dashboards[0].columns.length}
       {userprofile.dashboards[currentDash].shared.length > 0 ? (
         <Chat
           dashid={userprofile.dashboards[currentDash].id}

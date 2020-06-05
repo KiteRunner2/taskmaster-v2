@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import './Modal.css';
+import  { connect } from 'react-redux';
+import * as action from "../../utils/actions";
 
 function Draggable(props) {
     const showHideClassName = props.show
         ? 'modal display-block'
         : 'modal display-none';
-
+    const { dispatch, userprofile } = props;
+    
     function drag(e) {
         e.dataTransfer.setData('transfer', e.target.id);
     }
@@ -14,6 +17,30 @@ function Draggable(props) {
     function noAllowDrop(e) {
         e.stopPropagation();
     }
+
+    function saveCard(cardid, colIndex, cardIndex) {
+        const title = document.getElementById("title" + cardid)
+          ? document.getElementById("title" + cardid)
+          : "";
+        const description = document.getElementById("desc" + cardid)
+          ? document.getElementById("desc" + cardid)
+          : "";
+        const date = document.getElementById("date" + cardid)
+          ? document.getElementById("date" + cardid)
+          : "";
+        const updatedCard = {
+          title: title.value ? title.value : "",
+          id: cardid,
+          duedate: date.value ? date.value : "",
+          lables: ["Important", "Medium", "Low"],
+          description: description.value ? description.value : "",
+          asignee: [""],
+        };
+        
+        dispatch(action.updateCard({ updatedCard, colIndex, cardIndex }))
+        dispatch(action.updateUserProfile(userprofile));
+      }
+
     return (
         <div
             data-colIndex={props.colIndex}
@@ -23,29 +50,9 @@ function Draggable(props) {
             onDragStart={drag}
             onDragOver={noAllowDrop}
             style={props.style}
-            onBlur={() =>
-                props.saveCard(props.id, props.colIndex, props.cardIndex)
-            }
+            onBlur={() => saveCard(props.id, props.colIndex, props.cardIndex)}
         >
-            {/* <button
-                onClick={() =>
-                    props.deleteCard(props.colIndex, props.cardIndex)
-                }
-            >
-                <i class="far fa-trash-alt"></i>
-            </button> */}
-            {/* <button
-                onClick={() =>
-                    props.saveCard(props.cardid, props.colIndex, props.index)
-                }
-            >
-                <i class="far fa-save"></i>
-            </button> */}
-            {/* <button onClick={() => props.handleModalOpen()}>
-                <i class="far fa-edit"></i>
-            </button> */}
-            {/* <div className={showHideClassName}>{props.children}</div> */}
-            {props.children}
+        {props.children}
         </div>
     );
 }
@@ -56,4 +63,9 @@ Draggable.propTypes = {
     children: PropTypes.node,
 };
 
-export default Draggable;
+const mapStateToProps = (state) => {
+     return {
+        userprofile: {...state.user}
+     }
+}
+export default connect(mapStateToProps)(Draggable);

@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const utils = require('../utils');
 
 exports.updateUserProfile = async (req, res, next) => {
+    console.log('[SERVER]:updateUSerProfile request',req.body)
   const response = await db.userprofile.findOneAndReplace(
     { email: req.body.email },
     req.body
@@ -33,13 +34,14 @@ exports.getUser = async (req,res,next) => {
     );
     
     let reply = [];
-    reply.push(utils.removePassword(response));
+    // reply.push(utils.removePassword(response));
+    reply.push(response);
     reply.push(sharedDashboardsTo);
 
     if (response.length > 0) {
         console.log(reply)
-        res.json(reply);
-    } else res.json({ answer: 'nothing found' });
+        res.status(200).json(reply);
+    } else res.status(404).json({ answer: 'nothing found' });
 }
 
 exports.login = async (req,res,next) => {

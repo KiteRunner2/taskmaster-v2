@@ -34,7 +34,7 @@ const user = (state = initialState, action) => {
   const newState = { ...state };
   const currentDashboard = state.currentDashboard;
   const { payload } = action;
-  let dashboard;
+  let dashboard = { ...state.user.dashboards[currentDashboard] };
 
   switch (action.type) {
     case actionType.ADD_COLUMN:
@@ -65,7 +65,13 @@ const user = (state = initialState, action) => {
 
     case actionType.ADD_CARD:
       dashboard = { ...state.user.dashboards[currentDashboard] };
-      dashboard.columns[payload.colIndex].cards.push(addNewCard());
+      dashboard.columns[payload.colIndex].cards.unshift(addNewCard());
+      newState.user.dashboards[currentDashboard] = dashboard;
+      return newState;
+
+    case actionType.UPDATE_CARD:
+      console.log('[UPDATE_CARD] payload',payload)
+      dashboard.columns[payload.colIndex].cards[payload.cardIndex] = payload.updatedCard;
       newState.user.dashboards[currentDashboard] = dashboard;
       return newState;
 
