@@ -5,16 +5,17 @@ const utils = require('../utils');
 
 exports.updateUserProfile = async (req, res, next) => {
   if (!req.session.isLoggedIn) {
-    res.json({
-      error: 'user not logged in',
+    res.status(401).json({
+      error: 'Access denied',
     });
-  }
+  } else {
     console.log('[SERVER]:updateUSerProfile request',req.body)
   const response = await db.userprofile.findOneAndReplace(
     { email: req.body.email },
     req.body
   );
   res.json(response);
+  }
 };
 
 exports.userLogout = async (req, res, next) => {
@@ -55,11 +56,6 @@ exports.getUser = async (req,res,next) => {
     } else res.status(404).json({ answer: 'nothing found' });
 }
 
-  if (response.length > 0) {
-    res.json(reply);
-  } else res.json({ answer: 'nothing found' });
-};
-
 exports.postLogin = (req, res, next) => {
   req.session.isLoggedIn = true;
   const response = {
@@ -67,7 +63,7 @@ exports.postLogin = (req, res, next) => {
     email: req.email,
   };
   //   res.redirect('/projectdashboard');
-  res.json(response);
+  res.status(200).json(response);
 };
 
 exports.login = async (req, res, next) => {
@@ -100,14 +96,14 @@ exports.login = async (req, res, next) => {
         next();
       } else {
         response = { message: 'Invalid username/password' };
-        res.json(response);
+        res.status(401).json(response);
       }
     } else {
       response = { message: 'Invalid username/password' };
-      res.json(response);
+      res.status(401).json(response);
     }
   } else {
     response = { message: 'Database error' };
-    res.json(response);
+    res.status(500).json(response);
   }
 };
