@@ -4,11 +4,15 @@ const bcrypt = require('bcrypt');
 const utils = require('../utils');
 
 exports.updateUserProfile = async (req, res, next) => {
+<<<<<<< HEAD
   if (!req.session.isLoggedIn) {
     res.json({
       error: 'user not logged in',
     });
   }
+=======
+    console.log('[SERVER]:updateUSerProfile request',req.body)
+>>>>>>> dev-przemek-refactor
   const response = await db.userprofile.findOneAndReplace(
     { email: req.body.email },
     req.body
@@ -23,28 +27,36 @@ exports.userLogout = async (req, res, next) => {
   });
 };
 
-exports.getUser = async (req, res, next) => {
-  const query = { email: req.params.email };
-  let response = await db.userprofile.find(query);
-  response = JSON.stringify(response);
-  response = JSON.parse(response);
-  const sharedDashboardsTo = await db.userprofile.find(
-    {
-      'sharedByUser.to': req.params.email,
-    },
-    {
-      _id: 0,
-      email: 1,
-      'sharedByUser.$': 1,
-      dashboards: 1,
-      firstname: 1,
-      lastname: 1,
-    }
-  );
+exports.getUser = async (req,res,next) => {
+    const query = { email: req.params.email };
+    let response = await db.userprofile.find(query);
+    response = JSON.stringify(response);
+    response = JSON.parse(response);
+    console.log(response);
+    const sharedDashboardsTo = await db.userprofile.find(
+        {
+            'sharedByUser.to': req.params.email,
+        },
+        {
+            _id: 0,
+            email: 1,
+            'sharedByUser.$': 1,
+            dashboards: 1,
+            firstname: 1,
+            lastname: 1,
+        }
+    );
+    
+    let reply = [];
+    // reply.push(utils.removePassword(response));
+    reply.push(response);
+    reply.push(sharedDashboardsTo);
 
-  let reply = [];
-  reply.push(response);
-  reply.push(sharedDashboardsTo);
+    if (response.length > 0) {
+        console.log(reply)
+        res.status(200).json(reply);
+    } else res.status(404).json({ answer: 'nothing found' });
+}
 
   if (response.length > 0) {
     res.json(reply);

@@ -4,12 +4,19 @@ import TextArea from '../TextArea/TextArea';
 import TextAreaDesc from '../TextAreaDesc/TextAreaDesc';
 import DueDate from '../DueDate/DueDate';
 import AssignCard from '../AssignCard/AssignCard';
+import { connect } from "react-redux";
+import * as action from "../../utils/actions";
 
 function Card(props) {
-    // console.log('logging props passed to Card', props);
-    const card = props.card;
+    
+    const { dispatch, userprofile, card, colIndex, cardIndex } = props 
     function setAccordShow(id) {
         console.log('Btn clicked -- card ID:', id);
+    }
+
+    function deleteCardFromColumn(){
+        dispatch(action.deleteCard({colIndex:colIndex,cardIndex:cardIndex}))
+        dispatch(action.updateUserProfile(userprofile));
     }
 
     return (
@@ -19,9 +26,7 @@ function Card(props) {
                     <button
                         type="button"
                         className="btn-sm btn-outline-secondary cardDelBtn"
-                        onClick={() =>
-                            props.deleteCard(props.colIndex, props.cardIndex)
-                        }
+                        onClick={() => deleteCardFromColumn()}
                     >
                         <i class="far fa-trash-alt"></i>
                     </button>
@@ -79,4 +84,11 @@ function Card(props) {
     );
 }
 
-export default Card;
+const mapStateToProps = (state) => {
+    return {
+      userprofile: { ...state.user },
+      currentDashboard: state.currentDashboard,
+    };
+  };
+
+export default connect(mapStateToProps)(Card);
