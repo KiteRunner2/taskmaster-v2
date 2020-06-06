@@ -4,15 +4,12 @@ const bcrypt = require('bcrypt');
 const utils = require('../utils');
 
 exports.updateUserProfile = async (req, res, next) => {
-<<<<<<< HEAD
   if (!req.session.isLoggedIn) {
     res.json({
       error: 'user not logged in',
     });
   }
-=======
     console.log('[SERVER]:updateUSerProfile request',req.body)
->>>>>>> dev-przemek-refactor
   const response = await db.userprofile.findOneAndReplace(
     { email: req.body.email },
     req.body
