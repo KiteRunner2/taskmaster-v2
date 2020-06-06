@@ -26,14 +26,6 @@ let usersSockets = new Map();
 let userRooms = new Map();
 // let sharedDashboard = require('./shared.json');
 
-// const db_host = process.env.DB_HOST;
-// console.log(process.env);
-
-async function getUsers() {
-  const result = await db.find({}, { email: 1 });
-  // console.log('function getUsers called', result);
-}
-
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 // parse application/json
@@ -47,11 +39,11 @@ app.use(
   })
 );
 //route to get all users
-app.get('/api/getAllUsers', async (req, res) => {
+app.get('/api/getAllUsers', userController.userAuth, async (req, res) => {
   // console.log('api getAllUsers called');
   const response = await db.userprofile.find({}, 'email');
   if (response.length > 0) {
-    res.json(response);
+    res.status(200).json(response);
   } else res.json({ answer: 'empty set!' });
 });
 app.post('/api/insertShared', async (req, res) => {
